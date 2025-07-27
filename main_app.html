@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CornVolt</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 30px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 15px 20px;
+            background: #ecf0f1;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            color: #7f8c8d;
+        }
+
+        .tab-button.active {
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .upload-area {
+            border: 3px dashed #27ae60;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            background: linear-gradient(45deg, rgba(39, 174, 96, 0.05), rgba(46, 204, 113, 0.05));
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            border-color: #2ecc71;
+            background: linear-gradient(45deg, rgba(39, 174, 96, 0.1), rgba(46, 204, 113, 0.1));
+            transform: translateY(-2px);
+        }
+
+        .upload-area.dragover {
+            border-color: #2ecc71;
+            background: rgba(46, 204, 113, 0.1);
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 4em;
+            color: #27ae60;
+            margin-bottom: 15px;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(39, 174, 96, 0.4);
+        }
+
+        .btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .image-preview {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .image-preview:hover {
+            transform: scale(1.02);
+        }
+
+        .results {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 20px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid #27ae60;
+        }
+
+        .result-section {
+            margin-bottom: 25px;
+        }
+
+        .result-section h3 {
+            color: #27ae60;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 8px;
+        }
+
+        .result-item {
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #27ae60;
+        }
+
+        .result-label {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .confidence {
+            color: #27ae60;
+            font-weight: 600;
+        }
+
+        .severity {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .severity.normal { background: #2ecc71; color: white; }
+        .severity.ringan { background: #f39c12; color: white; }
+        .severity.sedang { background: #e67e22; color: white; }
+        .severity.parah { background: #e74c3c; color: white; }
+
+        .suggestions {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+
+        .suggestions h3 {
+            margin-bottom: 15px;
+            color: #ecf0f1;
+        }
+
+        .suggestions p, .suggestions li {
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            max-width: 100%;
+        }
+        .suggestions ul {
+            list-style-type: disc;
+            padding-left: 30px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #27ae60;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #e74c3c;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+
+        .success {
+            background: #27ae60;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+
+        .api-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 600;
+            z-index: 1000;
+        }
+
+        .api-status.connected {
+            background: #27ae60;
+            color: white;
+        }
+
+        .api-status.disconnected {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .camera-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        #videoElement {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        #captureButton {
+            margin-top: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="apiStatus" class="api-status disconnected">❌ Tidak Terhubung</div>
+    
+    <div class="container">
+        <h1>🌽 CornVolt</h1>
+        
+        <div class="tabs">
+            <button class="tab-button active" onclick="switchTab('detection')">Deteksi Penyakit</button>
+        </div>
+
+        <!-- Tab Deteksi Penyakit -->
+        <div id="detection" class="tab-content active">
+            <div class="upload-area" onclick="document.getElementById('imageInput').click()">
+                <div class="upload-icon">📷</div>
+                <h3>Klik atau seret gambar tanaman jagung ke sini</h3>
+                <p>Format yang didukung: JPG, PNG, JPEG (Max: 5MB)</p>
+            </div>
+            <input type="file" id="imageInput" accept="image/*" onchange="handleImageUpload(event)">
+            
+            <div id="imagePreview" style="display: none; text-align: center;">
+                <img id="previewImg" class="image-preview" alt="Preview">
+                <br>
+                <button class="btn" onclick="analyzeImage()">Analisis Penyakit</button>
+            </div>
+
+            <div id="cameraContainer" class="camera-container">
+                <video id="videoElement" autoplay playsinline></video>
+                <br>
+                <button id="captureButton" class="btn" onclick="capturePhoto()">Ambil Foto</button>
+                <button id="startCameraButton" class="btn" onclick="startCamera()" >Mulai Kamera</button>
+                <button id="stopCameraButton" class="btn" onclick="stopCamera()" >Matikan Kamera</button>
+            </div>
+
+            <div id="loadingArea" class="loading" style="display: none;">
+                <div class="spinner"></div>
+                <p>Menganalisis gambar tanaman jagung...</p>
+            </div>
+
+            <div id="results" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        // API Configuration
+        const API_BASE_URL = 'http://localhost:5000/api';
+        
+        let currentImage = null;
+        let stream = null;
+        let apiConnected = false;
+        
+        // Check API connection
+        async function checkApiConnection() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/health`);
+                const data = await response.json();
+        
+                if (data.status === 'healthy' && data.disease_model_loaded) {
+                    apiConnected = true;
+                    updateApiStatus(true);
+                } else {
+                    throw new Error('Disease model not loaded');
+                }
+            } catch (error) {
+                apiConnected = false;
+                updateApiStatus(false);
+                console.error('API connection failed:', error);
+            }
+        }
+
+        function updateApiStatus(connected) {
+            const statusElement = document.getElementById('apiStatus');
+            if (connected) {
+                statusElement.textContent = '✅ Terhubung';
+                statusElement.className = 'api-status connected';
+            } else {
+                statusElement.textContent = '❌ Tidak Terhubung';
+                statusElement.className = 'api-status disconnected';
+            }
+        }
+
+        // Tab switching
+        function switchTab(tabName) {
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            const tabButtons = document.querySelectorAll('.tab-button');
+            tabButtons.forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Image upload handling
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (!file.type.startsWith('image/')) {
+                showError('Harap pilih file gambar yang valid!');
+                return;
+            }
+
+            if (file.size > 5 * 1024 * 1024) {
+                showError('Ukuran file terlalu besar! Maksimal 5MB.');
+                return;
+            }
+
+            currentImage = file;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.getElementById('imagePreview');
+                const img = document.getElementById('previewImg');
+                img.src = e.target.result;
+                preview.style.display = 'block';
+                document.getElementById('cameraContainer').style.display = 'none'; // Sembunyikan saat gambar diunggah
+                stopCamera();
+                document.getElementById('results').style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Drag and drop functionality
+        const uploadArea = document.querySelector('.upload-area');
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                const fakeEvent = { target: { files: files } };
+                handleImageUpload(fakeEvent);
+            }
+        });
+
+        // Camera functionality
+        async function startCamera() {
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const videoDevices = devices.filter(device => device.kind === 'videoinput');
+                if (videoDevices.length === 0) {
+                    throw new Error('Tidak ada perangkat kamera yang terdeteksi. Periksa koneksi kamera Anda.');
+                }
+                console.log('Perangkat kamera terdeteksi:', videoDevices);
+                const constraints = { video: true }; // Gunakan constraints sederhana
+                stream = await navigator.mediaDevices.getUserMedia(constraints);
+                const videoElement = document.getElementById('videoElement');
+                videoElement.srcObject = stream;
+                videoElement.play(); // Pastikan video dimainkan
+                document.getElementById('startCameraButton').style.display = 'none';
+                document.getElementById('stopCameraButton').style.display = 'block';
+                document.getElementById('captureButton').disabled = false;
+                document.getElementById('imagePreview').style.display = 'none';
+                document.getElementById('cameraContainer').style.display = 'block';
+                document.getElementById('results').style.display = 'none';
+                console.log('Kamera berhasil diaktifkan');
+            } catch (error) {
+                const errorMessage = error.message || 'Tidak diketahui';
+                const errorDetails = `Error: ${error.name} - ${errorMessage}`;
+                showError(`Gagal mengakses kamera: ${errorDetails}`);
+                console.error('Camera error:', error.name, error.message, error.stack || 'No stack trace');
+            }
+        }
+
+        function stopCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                document.getElementById('videoElement').srcObject = null;
+                document.getElementById('stopCameraButton').style.display = 'none';
+                document.getElementById('startCameraButton').style.display = 'block';
+                document.getElementById('captureButton').disabled = true;
+            }
+        }
+
+        function capturePhoto() {
+            const videoElement = document.getElementById('videoElement');
+            if (!videoElement.srcObject) {
+                showError('Kamera belum diaktifkan!');
+                return;
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = videoElement.videoWidth;
+            canvas.height = videoElement.videoHeight;
+            const context = canvas.getContext('2d');
+            context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+
+            canvas.toBlob(blob => {
+                currentImage = new File([blob], 'photo.jpg', { type: 'image/jpeg' });
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('imagePreview');
+                    const img = document.getElementById('previewImg');
+                    img.src = e.target.result;
+                    preview.style.display = 'block';
+                    document.getElementById('cameraContainer').style.display = 'none'; // Sembunyikan setelah ambil foto
+                    stopCamera();
+                    document.getElementById('results').style.display = 'none';
+                };
+                reader.readAsDataURL(blob);
+            }, 'image/jpeg');
+        }
+
+        // Image analysis
+        async function analyzeImage() {
+            if (!currentImage) {
+                showError('Harap pilih gambar atau ambil foto terlebih dahulu!');
+                return;
+            }
+            
+            if (!apiConnected) {
+                showError('Tidak dapat terhubung ke server. Harap periksa koneksi!');
+                return;
+            }
+            
+            document.getElementById('loadingArea').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            
+            try {
+                const formData = new FormData();
+                formData.append('file', currentImage);
+                
+                const response = await fetch(`${API_BASE_URL}/predict`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                displayResults(result);
+                
+            } catch (error) {
+                console.error('Analysis error:', error);
+                showError('Gagal menganalisis gambar. Harap coba lagi.');
+            } finally {
+                document.getElementById('loadingArea').style.display = 'none';
+            }
+        }
+
+        // Display results
+        function displayResults(result) {
+            const resultsDiv = document.getElementById('results');
+            let html = '<div class="results">';
+
+            if (result.success) {
+                if (result.disease_detection && result.disease_detection.results.length > 0) {
+                    html += '<div class="result-section">';
+                    html += '<h3>🔍 Hasil Deteksi Penyakit:</h3>';
+            
+                    result.disease_detection.results.forEach((prediction, index) => {
+                        const severityClass = prediction.severity.toLowerCase();
+                        html += `
+                            <div class="result-item">
+                                <div class="result-label">Prediksi ${index + 1}:</div>
+                                <div><strong>${prediction.name}</strong>
+                                    <span class="severity ${severityClass}">${prediction.severity}</span>
+                                </div>
+                                <div class="confidence">Tingkat Kepercayaan: ${prediction.confidence.toFixed(1)}%</div>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                } else if (result.validation_failed) {
+                    html += `<div class="error">${result.message}</div>`;
+                }
+
+                if (result.anomaly_detection && result.anomaly_detection.results.length > 0) {
+                    html += '<div class="result-section">';
+                    html += '<h3>⚠️ Deteksi Anomali:</h3>';
+            
+                    result.anomaly_detection.results.forEach((anomaly, index) => {
+                        html += `
+                            <div class="result-item">
+                                <div class="result-label">Anomali ${index + 1}:</div>
+                                <div><strong>${anomaly.type}</strong></div>
+                                <div class="confidence">Tingkat Kepercayaan: ${anomaly.confidence.toFixed(1)}%</div>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                }
+
+                if (result.ai_suggestions) {
+                    html += '<div class="suggestions">';
+                    html += '<h3>💡 Saran Penanganan:</h3>';
+
+                    const suggestions = result.ai_suggestions;
+                    function truncateText(text, maxLength = 200) {
+                        return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+                    }
+
+                    html += `<p><strong>Diagnosis:</strong> ${truncateText(suggestions.diagnosis || 'Tidak tersedia')}</p>`;
+                    html += `<p><strong>Analisis Kepercayaan:</strong> ${truncateText(suggestions.confidence_analysis || 'Tidak tersedia')}</p>`;
+                    html += '<h4>Penanganan:</h4><ul>';
+                    const treatments = Array.isArray(suggestions.treatment_recommendations) 
+                        ? suggestions.treatment_recommendations 
+                        : [suggestions.treatment_recommendations || 'Tidak tersedia'];
+                    treatments.forEach(treatment => {
+                        html += `<li>${truncateText(treatment)}</li>`;
+                    });
+                    html += '</ul>';
+                    html += '<h4>Pencegahan:</h4><ul>';
+                    const tips = Array.isArray(suggestions.prevention_tips) 
+                        ? suggestions.prevention_tips 
+                        : [suggestions.prevention_tips || 'Tidak tersedia'];
+                    tips.forEach(tip => {
+                        html += `<li>${truncateText(tip)}</li>`;
+                    });
+                    html += '</ul>';
+                    html += '<p><strong>Tindakan Segera:</strong></p><ul>';
+                    const actions = Array.isArray(suggestions.immediate_actions) 
+                        ? suggestions.immediate_actions 
+                        : [suggestions.immediate_actions || 'Tidak tersedia'];
+                    actions.forEach(action => {
+                        html += `<li>${truncateText(action)}</li>`;
+                    });
+                    html += '</ul>';
+                    html += '<p><strong>Perawatan Jangka Panjang:</strong></p><ul>';
+                    const care = Array.isArray(suggestions.long_term_care) 
+                        ? suggestions.long_term_care 
+                        : [suggestions.long_term_care || 'Tidak tersedia'];
+                    care.forEach(item => {
+                        html += `<li>${truncateText(item)}</li>`;
+                    });
+                    html += '</ul>';
+                    html += '<p><strong>Tanda Peringatan:</strong></p><ul>';
+                    const signs = Array.isArray(suggestions.warning_signs) 
+                        ? suggestions.warning_signs 
+                        : [suggestions.warning_signs || 'Tidak tersedia'];
+                    signs.forEach(sign => {
+                        html += `<li>${truncateText(sign)}</li>`;
+                    });
+                    html += '</ul>';
+
+                    if (suggestions.raw_response) {
+                        html += `<p><strong>Raw Response (Debug):</strong> ${truncateText(suggestions.raw_response)}</p>`;
+                    }
+
+                    html += '</div>';
+                }
+            } else {
+                html += `<div class="error">${result.message || 'Tidak dapat mendeteksi penyakit pada gambar ini.'}</div>`;
+            }
+
+            html += '</div>';
+            resultsDiv.innerHTML = html;
+            resultsDiv.style.display = 'block';
+        }
+
+        // Utility functions
+        function showError(message) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = `<div class="error">${message}</div>`;
+            resultsDiv.style.display = 'block';
+        }
+
+        function showSuccess(message) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = `<div class="success">${message}</div>`;
+            resultsDiv.style.display = 'block';
+        }
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            checkApiConnection();
+            document.getElementById('captureButton').disabled = true;
+            setInterval(checkApiConnection, 30000);
+        });
+    </script>
+</body>
+</html>
