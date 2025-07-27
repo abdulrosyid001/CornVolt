@@ -2,7 +2,7 @@ flask
 flask-cors
 torch
 torchvision
-Pillow
-numpy
 opencv-python
+pillow
+gunicorn
 google-generativeai
