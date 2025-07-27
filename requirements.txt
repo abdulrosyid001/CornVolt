@@ -1,0 +1,8 @@
+flask
+flask-cors
+torch
+torchvision
+Pillow
+numpy
+opencv-python
+google-generativeai
