@@ -14,6 +14,7 @@ import google.generativeai as genai
 import os
 from typing import Dict, List, Optional
 import json
+import re
 
 app = Flask(__name__)
 CORS(app)
@@ -22,6 +23,8 @@ CORS(app)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Ambil GEMINI_API_KEY dari variabel lingkungan
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 if GEMINI_API_KEY:
     genai.configure(api_key=GEMINI_API_KEY)
     gemini_model = genai.GenerativeModel('gemini-pro')
@@ -34,7 +37,7 @@ DISEASE_CLASSES = [
     'Hawar Daun (Blight)',
     'Karat Jagung (Rust)',
     'Bercak Daun Jagung (Cercospora)',
-    'Sehat' 
+    'Sehat'
 ]
 
 # Definisi model autoencoder untuk deteksi anomali
@@ -169,11 +172,9 @@ def load_models() -> bool:
     global disease_model, anomaly_model, model_type
     
     try:
-        # Define device
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         logger.info(f"Using device: {device}")
 
-        # Load disease model (DenseNet)
         model_path = 'best_mobilenet_model.pth'
         
         if not os.path.exists(model_path):
@@ -472,7 +473,6 @@ def generate_gemini_suggestions(disease_results: List[Dict], anomaly_results: Li
         response_text = response.text.strip()
         
         # Coba ekstrak JSON dari respons
-        import re
         json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
         if json_match:
             response_text = json_match.group(0)
@@ -798,6 +798,7 @@ if __name__ == '__main__':
     logger.info("Starting Corn Disease Detection API...")
     if load_models():
         logger.info("Models loaded successfully. Starting Flask server...")
-        app.run(debug=True, host='0.0.0.0', port=5000)
+        port = int(os.getenv("PORT", 5000))  # Gunakan port dari env atau default 5000
+        app.run(host='0.0.0.0', port=port)
     else:
         logger.error("Failed to load models. Exiting...")
