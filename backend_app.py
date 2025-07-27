@@ -174,7 +174,7 @@ def load_models() -> bool:
         logger.info(f"Using device: {device}")
 
         # Load disease model (DenseNet)
-        model_path = 'D:/Kaggle_competition/Smatic image classification/models/best_densenet_model.pth'
+        model_path = 'best_mobilenet_model.pth'
         
         if not os.path.exists(model_path):
             logger.error(f"Model file not found at: {model_path}")
@@ -225,7 +225,7 @@ def load_models() -> bool:
 
         # Load anomaly model (Autoencoder)
         logger.info("Loading PyTorch anomaly detection model...")
-        anomaly_model_path = "D:/Kaggle_competition/Smatic image classification/models/best_autoencoder.pth"
+        anomaly_model_path = "best_autoencoder.pth"
         
         if not os.path.exists(anomaly_model_path):
             logger.error(f"PyTorch anomaly model file not found at: {anomaly_model_path}")
